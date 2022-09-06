@@ -587,4 +587,4 @@ And the following in the front-end directory
 ``` 
 npm start
 ```
-15. Try adding a username and password and making sure that you can authenticate using those credentials.
+15. Try adding a username and password and making sure that you can authenticate using those credentials.  Notice that the back end produces a lot of debug information.  Note that the password stored in the database is the hash of the password you present.  If someone were to break into your database, they could not get a list of passwords for your users.
