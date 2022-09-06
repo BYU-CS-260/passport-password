@@ -29,6 +29,7 @@ class Home extends Component {
     }
 }
 ```
+The home.js component just displays a simple message.  If we are authenticated, then App.js will display our username.
 4. Create src/components/login-form.js with the following content
 ```js
 import React, { Component } from 'react'
@@ -46,7 +47,6 @@ class LoginForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleChange = this.handleChange.bind(this)
     }
-
     handleChange(event) {
         this.setState({
             [event.target.name]: event.target.value
@@ -55,25 +55,27 @@ class LoginForm extends Component {
 
     handleSubmit(event) {
         event.preventDefault()
-        axios.post('/user/login', {
-            username: this.state.username,
-            password: this.state.password
-        })
-        .then(response => {
-            if (response.status === 200) {
-                // update App.js state
-                this.props.updateUser({
-                    loggedIn: true,
-                    username: response.data.username
-                })
-                // update the state to redirect to home
-                this.setState({
-                    redirectTo: '/'
-                })
-            }
-        }).catch(error => {
-            console.log('login error: ')
-        })
+        axios
+            .post('/user/login', {
+                username: this.state.username,
+                password: this.state.password
+            })
+            .then(response => {
+                if (response.status === 200) {
+                    // update App.js state
+                    this.props.updateUser({
+                        loggedIn: true,
+                        username: response.data.username
+                    })
+                    // update the state to redirect to home
+                    this.setState({
+                        redirectTo: '/'
+                    })
+                }
+            }).catch(error => {
+                console.log('login error: ')
+                console.log(error);
+            })
     }
 
     render() {
@@ -83,42 +85,26 @@ class LoginForm extends Component {
             return (
                 <div>
                     <h4>Login</h4>
-                    <form>
-                        <div >
-                            <div >
-                                <label htmlFor="username">Username</label>
-                            </div>
-                            <div >
-                                <input 
-                                    type="text"
-                                    id="username"
-                                    name="username"
-                                    placeholder="Username"
-                                    value={this.state.username}
-                                    onChange={this.handleChange}
-                                />
-                            </div>
-                        </div>
-                        <div ">
-                            <div >
-                                <label htmlFor="password">Password: </label>
-                            </div>
-                            <div >
-                                <input 
-                                    placeholder="password"
-                                    type="password"
-                                    name="password"
-                                    value={this.state.password}
-                                    onChange={this.handleChange}
-                                />
-                            </div>
-                        </div>
-                        <div className="form-group ">
-                            <div></div>
-                            <button
-                                onClick={this.handleSubmit}
-                                type="submit">Login</button>
-                        </div>
+                    <form >
+                        <input 
+                            type="text"
+                            id="username"
+                            name="username"
+                            placeholder="Username"
+                            value={this.state.username}
+                            onChange={this.handleChange}
+                        />
+                        <input
+                            placeholder="password"
+                            type="password"
+                            name="password"
+                            value={this.state.password}
+                            onChange={this.handleChange}
+                        />
+                        <button
+                            onClick={this.handleSubmit}
+                            type="submit">Login
+                        </button>
                     </form>
                 </div>
             )
@@ -127,13 +113,12 @@ class LoginForm extends Component {
 }
 
 export default LoginForm
+
 ```
 5. Create src/components/navbar.js with the following content
 ```js
 import React, { Component } from 'react'
-import { Redirect } from 'react-router-dom'
-import { Route, Link } from 'react-router-dom'
-import '../App.css';
+import {Link } from 'react-router-dom'
 import axios from 'axios'
 
 class Navbar extends Component {
@@ -162,34 +147,26 @@ class Navbar extends Component {
         const loggedIn = this.props.loggedIn;
         console.log('navbar render, props: ')
         console.log(this.props);
+        
         return (
             <div>
-                <header >
-                    <div  >
-                        {loggedIn ? (
-                            <section >
-                                <Link to="#" onClick={this.logout}>
-                                <span>logout</span></Link>
-                            </section>
-                        ) : (
-                                <section >
-                                    <Link to="/" >
-                                        <span >home</span>
-                                        </Link>
-                                    <Link to="/login" >
-                                    <span >login</span>
-				</Link>
-                                    <Link to="/signup" >
-                                    <span >sign up</span>
-				</Link>
-                                </section>
-                            )}
+                {loggedIn ? (
+                    <Link to="#"  onClick={this.logout}>
+                    <span >logout</span></Link>
+                ) : (
+                    <div>
+                        <Link to="/">
+                            <span> home </span>
+                        </Link>
+                        <Link to="/login" >
+                            <span > login </span>
+                        </Link>
+                        <Link to="/signup" >
+                            <span > sign up </span>
+                        </Link>
                     </div>
-                    <div >
-                    <div id="top-filler"></div>
-                        <h1 className="App-title">Using Passport</h1>
-                    </div>
-                </header>
+                )}
+                <h1 > Passport</h1>
             </div>
         );
     }
@@ -197,3 +174,83 @@ class Navbar extends Component {
 
 export default Navbar
 ```
+The Navbar component just displays the options based on whether you are logged in or not.
+
+6. Create src/components/signup.js with the following content
+```js
+import React, { Component } from 'react'
+import { Redirect } from 'react-router-dom'
+import axios from 'axios'
+
+class Signup extends Component {
+	constructor() {
+		super()
+		this.state = {
+			username: '',
+			password: '',
+			confirmPassword: '',
+		}
+		this.handleSubmit = this.handleSubmit.bind(this)
+		this.handleChange = this.handleChange.bind(this)
+	}
+	handleChange(event) {
+		this.setState({
+			[event.target.name]: event.target.value
+		})
+	}
+	handleSubmit(event) {
+		event.preventDefault()
+		//request to server to add a new username/password
+		axios.post('/user/', {
+			username: this.state.username,
+			password: this.state.password
+		})
+			.then(response => {
+				if (!response.data.errmsg) {
+					this.setState({
+                        redirectTo: '/login'
+                    })
+				} 
+			}).catch(error => {
+				console.log('signup error: ')
+				console.log(error)
+			})
+	}
+
+	render() {
+		if (this.state.redirectTo) {
+	        return <Redirect to={{ pathname: this.state.redirectTo }} />
+	    } else {
+			return (
+				<div>
+					<h4>Sign up</h4>
+					<form >
+						<input className="form-input"
+							type="text"
+							id="username"
+							name="username"
+							placeholder="Username"
+							value={this.state.username}
+							onChange={this.handleChange}
+						/>
+						<input className="form-input"
+							placeholder="password"
+							type="password"
+							name="password"
+							value={this.state.password}
+							onChange={this.handleChange}
+						/>
+						<button
+							onClick={this.handleSubmit}
+							type="submit"
+						>Sign up</button>
+					</form>
+				</div>
+			)
+		}
+	}
+}
+
+export default Signup
+```
+The Signup component performs a post to create a new user and then login page.
