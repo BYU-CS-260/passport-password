@@ -30,6 +30,7 @@ class Home extends Component {
 }
 ```
 The home.js component just displays a simple message.  If we are authenticated, then App.js will display our username.
+
 4. Create src/components/login-form.js with the following content
 ```js
 import React, { Component } from 'react'
