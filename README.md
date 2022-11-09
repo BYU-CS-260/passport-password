@@ -368,6 +368,7 @@ mkdir back-end
 mkdir back-end/database
 mkdir back-end/routes
 mkdir back-end/passport
+mkdir back-end/models
 ```
 
 10. create a file back-end/server.js with the following content
