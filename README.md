@@ -131,7 +131,7 @@ The home.js component just displays a simple message.  If we are authenticated, 
 5. Create src/components/login-form.js with the following content
 ```js
 import React, { Component } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import axios from 'axios'
 
 class LoginForm extends Component {
@@ -178,7 +178,7 @@ class LoginForm extends Component {
 
     render() {
         if (this.state.redirectTo) {
-            return <Redirect to={{ pathname: this.state.redirectTo }} />
+            return <Navigate to={{ pathname: this.state.redirectTo }} />
         } else {
             return (
                 <div>
@@ -277,7 +277,7 @@ The Navbar component just displays the options based on whether you are logged i
 7. Create src/components/signup.js with the following content
 ```js
 import React, { Component } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import axios from 'axios'
 
 class Signup extends Component {
@@ -317,7 +317,7 @@ class Signup extends Component {
 
 	render() {
 		if (this.state.redirectTo) {
-	        return <Redirect to={{ pathname: this.state.redirectTo }} />
+	        return <Navigate to={{ pathname: this.state.redirectTo }} />
 	    } else {
 			return (
 				<div>
