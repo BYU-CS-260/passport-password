@@ -58,7 +58,10 @@ router.post('/logout', (req, res) => {
     console.log("Post logout");
     console.log(req.data)
     if (req.user) {
-        req.logout()
+        console.log("calling logout")
+        req.logout(function(err) {
+            console.log(err);
+        })
         res.send({ msg: 'logging out' })
     } else {
         res.send({ msg: 'no user to log out' })
