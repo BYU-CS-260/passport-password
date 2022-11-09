@@ -1,24 +1,35 @@
 # Passport
 This tutorial will show you how to set up authentication using passwords with passport.
 
-1. We are going to create a front end and a back end, so create a directory where your project will live "passport" and set up your React CLI in that directory
+1. First download the git repository with git clone.  Notice that it has a front-end and a back-end directory.  Open two windows, in one enter:
 ```
-npx create-react-app front-end
-cd front-end/
+cd front-end
+npm install
+npm start
+
 ```
-And add the proxy line to your package.json file
+In the other window
 ```
-"proxy": "http://localhost:3000",
+cd back-end
+npm install
+node server.js
 ```
-And create a file ".env.development.local" with the following content
-```
-DANGEROUSLY_DISABLE_HOST_CHECK=true
-```
-2. Now create a "components" folder in your React "src" directory.  
-```
-mkdir src/components
-```
-3. Create src/App.js with the following content
+
+2. Now test the application by going to ```http://yourserver:8080``` in your browser.  You should see the home view
+
+![home](images/home.png)
+
+When you select the signup menu, you should be able to create a password.
+
+![home](images/signup.png)
+
+When you select the login menu, you should be able to see the home view with a personalized greeting.
+
+![home](images/login.png)
+
+![home](images/loggedin.png)
+
+3. Lets look at the pieces of the application and how they work together. ```src/App.js``` creates routes for home, login and signup and inserts a greeting if the user is authenticated.
 ```js
 import React, { Component } from 'react';
 import axios from 'axios'
@@ -104,9 +115,9 @@ class App extends Component {
 
 export default App;
 ```
-App.js creates routes for home, login and signup and inserts a greeting if the user is authenticated.
 
-4. Create src/components/home.js with the following content
+
+4. Look at ```src/components/home.js``` The home.js component just displays a simple message.  If we are authenticated, then App.js will display our username.
 ```js
 import React, { Component } from 'react'
 
@@ -126,9 +137,8 @@ class Home extends Component {
 }
 export default Home
 ```
-The home.js component just displays a simple message.  If we are authenticated, then App.js will display our username.
 
-5. Create src/components/login-form.js with the following content
+5. ```src/components/login-form.js``` creates a form and calles the login route.
 ```js
 import React, { Component } from 'react'
 import { Navigate } from 'react-router-dom'
@@ -213,7 +223,7 @@ class LoginForm extends Component {
 export default LoginForm
 
 ```
-6. Create src/components/navbar.js with the following content
+6. ```src/components/navbar.js``` creates the menu and displays the options based on whether you are logged in or not.
 ```js
 import React, { Component } from 'react'
 import {Link } from 'react-router-dom'
@@ -272,9 +282,8 @@ class Navbar extends Component {
 
 export default Navbar
 ```
-The Navbar component just displays the options based on whether you are logged in or not.
 
-7. Create src/components/signup.js with the following content
+7. The Signup component performs a post to create a new user.
 ```js
 import React, { Component } from 'react'
 import { Navigate } from 'react-router-dom'
@@ -351,42 +360,28 @@ class Signup extends Component {
 
 export default Signup
 ```
-The Signup component performs a post to create a new user and then login page.
 
-8. Test to see if your front end works by running
-```
-npm install axios
-npm install react-router-dom
-npm install redirect
-npm start
-```
-You may see errors because the back end is not working yet.
 
-9. Create a "back-end" directory with subdirectories "database", "routes" and "passport".
-```
-mkdir back-end
-mkdir back-end/database
-mkdir back-end/database/models
-mkdir back-end/routes
-mkdir back-end/passport
-npm init
-npm install --save mongoose
-npm install --save express-session
-npm install --save passport passport-local bcryptjs
-```
+8. Now look at the "back-end" directory with subdirectories "database", "routes" and "passport".  server.js sets up the database and inclueds the routes in routes/user.js.
 
-10. create a file back-end/server.js with the following content
 ```js
 const express = require('express')
-const bodyParser = require('body-parser')
 const session = require('express-session')
-const dbConnection = require('./database') 
-const MongoStore = require('connect-mongo')(session)
+const MongoStore = require('connect-mongo')
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser')
+const morgan = require('morgan')
 const passport = require('./passport');
-const app = express()
-const PORT = 3000
 // Route requires
 const user = require('./routes/user')
+
+const app = express()
+const PORT = 3000
+
+const clientP = mongoose.connect(
+  'mongodb://localhost:27017/simple-mern-passport',
+  { useNewUrlParser: true, useUnifiedTopology: true }
+).then(m => m.connection.getClient())
 
 // MIDDLEWARE
 app.use(
@@ -396,15 +391,18 @@ app.use(
 )
 app.use(bodyParser.json())
 
-// Sessions
-app.use(
-	session({
-		secret: 'fraggle-rock', //pick a random string to make the hash that is generated secure
-		store: new MongoStore({ mongooseConnection: dbConnection }),
-		resave: false, //required
-		saveUninitialized: false //required
-	})
-)
+app.use(session({
+  secret: 'fraggle-rock', //pick a random string to make the hash that is generated secure
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    clientPromise: clientP,
+    dbName: "simple-mern-passport",
+    stringify: false,
+    autoRemove: 'interval',
+    autoRemoveInterval: 1
+  })
+}));
 
 // Passport
 app.use(passport.initialize())
@@ -419,9 +417,8 @@ app.listen(PORT, () => {
 	console.log(`App listening on PORT: ${PORT}`)
 })
 ```
-The "server.js" file imports the other back end files, and initializes the sessions and passport modules.
 
-11. Create "routes/users.js" with the following content
+9. In "routes/users.js",  the POST route for "/signup" handles the requests from axios "/user/signup".  The POST route for /login handles the axios request for "/user/login". The GET route for "/" handles requests from axios "/user".  The "/user" part of the route is prepended due to them being in a user.js file.  The "/signup" route calls the database to see if the username already exists and will save the hashed password if everything works.  The "/login" route authenticates using the "local" strategy.  This code could be changed to authenticate with google or facebook authentication.
 ```js
 const express = require('express')
 const router = express.Router()
@@ -492,9 +489,9 @@ router.post('/logout', (req, res) => {
 
 module.exports = router
 ```
-The POST route for "/signup" handles the requests from axios "/user/signup".  The POST route for /login handles the axios request for "/user/login". The GET route for "/" handles requests from axios "/user".  The "/user" part of the route is prepended due to them being in a user.js file.  The "/signup" route calls the database to see if the username already exists and will save the hashed password if everything works.  The "/login" route authenticates using the "local" strategy.  This code could be changed to authenticate with google or facebook authentication.
 
-11. Create "models/index.js" with the following content
+
+10. The "models/index.js" connects to the mongo database using mongoose.
 ```js
 //Connect to Mongo database
 const mongoose = require('mongoose')
@@ -521,9 +518,9 @@ mongoose.connect(uri).then(
 
 module.exports = mongoose.connection
 ```
-This module connects to the mongo database using mongoose.
 
-12. Create "passport/index.js" with the following content
+
+11. The "passport/index.js" saves the session information.
 ```js
 const passport = require('passport')
 const LocalStrategy = require('./localStrategy')
@@ -557,9 +554,9 @@ passport.use(LocalStrategy)
 
 module.exports = passport
 ```
-This module saves the session information.
 
-13. Create "passport/localStrategy.js" with the following content
+
+12. The "passport/localStrategy.js" module defines the local strategy of looking up the hashed password and comparing it to password entered by the user.
 ```js
 const User = require('../database/models/user')
 const LocalStrategy = require('passport-local').Strategy
@@ -586,14 +583,6 @@ const strategy = new LocalStrategy(
 
 module.exports = strategy
 ```
-This module defines the local strategy of looking up the hashed password and comparing it to password entered by the user.
 
-14. You should now be able to test the whole application by running the following in the back-end directory
-```
-node server.js
-```
-And the following in the front-end directory
-``` 
-npm start
-```
-15. Try adding a username and password and making sure that you can authenticate using those credentials.  Notice that the back end produces a lot of debug information.  Note that the password stored in the database is the hash of the password you present.  If someone were to break into your database, they could not get a list of passwords for your users.
+
+13. Try adding a username and password and making sure that you can authenticate using those credentials.  Notice that the back end produces a lot of debug information.  Note that the password stored in the database is the hash of the password you present.  If someone were to break into your database, they could not get a list of passwords for your users.
