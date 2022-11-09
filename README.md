@@ -366,9 +366,13 @@ You may see errors because the back end is not working yet.
 ```
 mkdir back-end
 mkdir back-end/database
+mkdir back-end/database/models
 mkdir back-end/routes
 mkdir back-end/passport
-mkdir back-end/models
+npm init
+npm install --save mongoose
+npm install --save express-session
+npm install --save passport passport-local bcryptjs
 ```
 
 10. create a file back-end/server.js with the following content
