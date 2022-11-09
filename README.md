@@ -124,6 +124,7 @@ class Home extends Component {
 
     }
 }
+export default Home
 ```
 The home.js component just displays a simple message.  If we are authenticated, then App.js will display our username.
 
@@ -354,6 +355,9 @@ The Signup component performs a post to create a new user and then login page.
 
 8. Test to see if your front end works by running
 ```
+npm install axios
+npm install react-router-dom
+npm install redirect
 npm start
 ```
 You may see errors because the back end is not working yet.
