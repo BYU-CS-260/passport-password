@@ -33,9 +33,9 @@ When you select the login menu, you should be able to see the home view with a p
 ```js
 import React, { Component } from 'react';
 import axios from 'axios'
-import { Route} from 'react-router-dom'
+import {Routes, Route} from 'react-router-dom'
 // components
-import Signup from './components/signup'
+import Signup from './components/sign-up'
 import LoginForm from './components/login-form'
 import Navbar from './components/navbar'
 import Home from './components/home'
@@ -89,24 +89,27 @@ class App extends Component {
         <Navbar updateUser={this.updateUser} loggedIn={this.state.loggedIn} />
         {/* greet user if logged in: */}
         {this.state.loggedIn &&
-          <p>You are Authenticated, {this.state.username}!</p>
+          <p>Join the party, {this.state.username}!</p>
         }
         {/* Routes to different components */}
+        
+        <Routes>
         <Route
           exact path="/"
-          component={Home} />
+          element={<Home/>} />
         <Route
           path="/login"
-          render={() =>
-            <LoginForm
+          element={<LoginForm
               updateUser={this.updateUser}
             />}
         />
         <Route
           path="/signup"
-          render={() =>
-            <Signup/>}
+          element={<Signup/>}
         />
+        </Routes>
+        
+        
 
       </div>
     );
@@ -114,6 +117,7 @@ class App extends Component {
 }
 
 export default App;
+
 ```
 
 
