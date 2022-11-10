@@ -615,3 +615,45 @@ module.exports = strategy
 
 
 13. Try adding a username and password and making sure that you can authenticate using those credentials.  Notice that the back end produces a lot of debug information.  Note that the password stored in the database is the hash of the password you present.  If someone were to break into your database, they could not get a list of passwords for your users.
+
+14. If you want to serve your application with Caddy, you can do the following:
+- Create a new directory for your build folder and create a symbolic link to that directory in your Cloud9 file tree
+```
+sudo mkdir /var/www/html/passport
+sudo chown ubuntu /var/www/html/passport
+```
+- Create a symbolic link to /var/www/html/
+```
+ln -s /var/www/html/passport ~/environment/passport
+```
+- Create the build directory and copy it to /var/www/html/passport
+```
+cd front-end
+npm run build
+cp -r build/* /var/www/html/passport
+```
+- You should be able to see the files in your file tree
+- Edit your caddy file and add a proxy for your back end
+```
+passport.markclement.net {
+        # Set this path to your site's directory.
+         root * /var/www/html/passport
+        #
+        handle /user/* {
+                reverse_proxy localhost:3001
+        }
+        # Enable the static file server.
+        file_server
+}
+```
+- Change your back end code to use port 3001
+```
+const app = express()
+const PORT = 3001
+```
+- Run your back end
+```
+cd back-end
+node server.js
+```
+- Access the URL in your browser window at https://passport.markclement.net/
